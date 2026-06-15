@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Gift, Loader2, Plus, Pencil } from "lucide-react";
+import { Gift, Plus, Pencil } from "lucide-react";
 
 import apiClient from "@/lib/api-client";
 import type { Reward } from "@/types";
@@ -9,21 +9,22 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import RewardForm, {
   type RewardFormData,
 } from "@/components/admin/RewardForm";
+import { AdminCardGridSkeleton } from "@/components/ui/loading-state";
 
 export default function AdminRewardsPage() {
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Sheet state for create/edit
+  // Dialog state for create/edit
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editingReward, setEditingReward] = useState<Reward | null>(null);
 
@@ -91,26 +92,28 @@ export default function AdminRewardsPage() {
   }
 
   return (
-    <div className="space-y-4">
-      {/* Page Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Rewards</h1>
-          <p className="text-sm text-muted-foreground">
-            Kelola hadiah yang bisa ditukar member dengan poin.
-          </p>
+    <div className="min-w-0 space-y-4 py-5">
+      <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-[0_18px_45px_-38px_rgba(15,23,42,0.75)]">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-sm font-black text-slate-900">Katalog reward</p>
+            <p className="text-xs font-medium text-slate-500">
+              {rewards.length} reward tersedia
+            </p>
+          </div>
+          <Button
+            onClick={handleCreate}
+            className="h-10 rounded-xl bg-blue-500 px-4 text-white shadow-[0_16px_28px_-18px_rgba(37,99,235,0.9)] hover:bg-blue-600"
+          >
+            <Plus className="mr-1 h-4 w-4" />
+            Tambah Reward
+          </Button>
         </div>
-        <Button onClick={handleCreate}>
-          <Plus className="mr-1 h-4 w-4" />
-          Tambah Reward
-        </Button>
       </div>
 
       {/* Content */}
       {loading ? (
-        <div className="flex items-center justify-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </div>
+        <AdminCardGridSkeleton cards={6} />
       ) : rewards.length === 0 ? (
         <Card className="flex flex-col items-center justify-center py-16 text-center">
           <Gift className="mb-3 h-10 w-10 text-muted-foreground" />
@@ -126,11 +129,11 @@ export default function AdminRewardsPage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {rewards.map((reward) => (
-            <Card key={reward.id} className="flex flex-col p-4">
+            <Card key={reward.id} className="flex flex-col p-4 transition-all hover:-translate-y-0.5 hover:shadow-md">
               {/* Header */}
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0 flex-1">
-                  <h3 className="truncate font-medium">{reward.name}</h3>
+                  <h3 className="truncate text-base font-semibold">{reward.name}</h3>
                   {reward.description && (
                     <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
                       {reward.description}
@@ -173,25 +176,25 @@ export default function AdminRewardsPage() {
         </div>
       )}
 
-      {/* Create/Edit Sheet */}
-      <Sheet
+      {/* Create/Edit Dialog */}
+      <Dialog
         open={sheetOpen}
         onOpenChange={(open) => {
           if (!open) handleCancel();
         }}
       >
-        <SheetContent side="right">
-          <SheetHeader>
-            <SheetTitle>
+        <DialogContent className="max-h-[88vh] overflow-y-auto p-0 sm:max-w-2xl">
+          <DialogHeader className="border-b border-slate-200 bg-[linear-gradient(135deg,#ffffff_0%,#fff7ed_50%,#f0f9ff_100%)] px-7 py-6">
+            <DialogTitle>
               {editingReward ? "Edit Reward" : "Tambah Reward"}
-            </SheetTitle>
-            <SheetDescription>
+            </DialogTitle>
+            <DialogDescription>
               {editingReward
                 ? "Ubah detail reward yang sudah ada."
                 : "Buat reward baru yang bisa ditukar member dengan poin."}
-            </SheetDescription>
-          </SheetHeader>
-          <div className="flex-1 overflow-y-auto p-4">
+            </DialogDescription>
+          </DialogHeader>
+          <div className="px-7 py-6">
             <RewardForm
               key={editingReward?.id ?? "create"}
               reward={editingReward}
@@ -199,8 +202,8 @@ export default function AdminRewardsPage() {
               onCancel={handleCancel}
             />
           </div>
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

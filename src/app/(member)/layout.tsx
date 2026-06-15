@@ -22,15 +22,15 @@ export default function MemberLayout({
   return (
     <div className="flex min-h-screen flex-col bg-background">
       {/* Page content — allow scrolling above bottom nav */}
-      <main className="flex-1 pb-20">{children}</main>
+      <main className="flex-1 pb-24">{children}</main>
 
       {/* Bottom navigation bar */}
       <nav
-        className="fixed inset-x-0 bottom-0 z-50 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80"
+        className="fixed inset-x-0 bottom-0 z-50 border-t border-border/80 bg-card/92 pb-safe-bottom shadow-[0_-10px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl"
         role="navigation"
         aria-label="Menu utama"
       >
-        <ul className="mx-auto flex h-16 max-w-md items-center justify-around px-2">
+        <ul className="mx-auto flex h-[72px] max-w-md items-center justify-around px-3 py-2">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
@@ -40,10 +40,10 @@ export default function MemberLayout({
                 <Link
                   href={item.href}
                   className={cn(
-                    "flex min-h-[44px] min-w-[44px] flex-col items-center justify-center gap-0.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
+                    "flex min-h-[52px] min-w-[64px] flex-col items-center justify-center gap-1 rounded-xl px-3 py-2 text-xs font-semibold transition-all",
                     isActive
-                      ? "text-primary"
-                      : "text-muted-foreground hover:text-foreground"
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   )}
                   aria-current={isActive ? "page" : undefined}
                 >

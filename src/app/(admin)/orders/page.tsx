@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { format } from "date-fns";
-import { id } from "date-fns/locale/id";
+import { id } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 
 import apiClient from "@/lib/api-client";
@@ -31,6 +31,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import OrderTable from "@/components/admin/OrderTable";
+import { AdminTableSkeleton } from "@/components/ui/loading-state";
 
 type StatusFilter = "all" | OrderStatus;
 
@@ -153,41 +154,43 @@ export default function AdminOrdersPage() {
   }
 
   return (
-    <div className="space-y-4">
-      {/* Page Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Orders</h1>
-          <p className="text-sm text-muted-foreground">
-            Validasi pembayaran dan kelola order pelanggan.
-          </p>
+    <div className="min-w-0 space-y-4 py-5">
+      <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-[0_18px_45px_-38px_rgba(15,23,42,0.75)]">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-sm font-black text-slate-900">
+              Validasi pembayaran
+            </p>
+            <p className="text-xs font-medium text-slate-500">
+              {total} order terdaftar
+            </p>
+          </div>
+          <Select
+            value={statusFilter as string}
+            onValueChange={(val: string | null) => {
+              if (val) setStatusFilter(val as StatusFilter);
+            }}
+          >
+            <SelectTrigger
+              aria-label="Filter status order"
+              className="bg-white sm:w-48"
+            >
+              <SelectValue placeholder="Filter status" />
+            </SelectTrigger>
+            <SelectContent>
+              {STATUS_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value as string}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-
-        {/* Status Filter */}
-        <Select
-          value={statusFilter as string}
-          onValueChange={(val: string | null) => {
-            if (val) setStatusFilter(val as StatusFilter);
-          }}
-        >
-          <SelectTrigger aria-label="Filter status order">
-            <SelectValue placeholder="Filter status" />
-          </SelectTrigger>
-          <SelectContent>
-            {STATUS_OPTIONS.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value as string}>
-                {opt.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
 
       {/* Content */}
       {loading ? (
-        <div className="flex items-center justify-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </div>
+        <AdminTableSkeleton rows={7} columns={8} />
       ) : (
         <>
           <OrderTable
@@ -253,7 +256,7 @@ export default function AdminOrdersPage() {
           </DialogHeader>
 
           {actionError && (
-            <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
               {actionError}
             </div>
           )}
@@ -349,7 +352,7 @@ export default function AdminOrdersPage() {
               </div>
 
               {/* Totals */}
-              <div className="space-y-1 border-t pt-2">
+              <div className="space-y-1 rounded-xl bg-muted/45 p-3">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Subtotal</span>
                   <span>{formatIDR(detailDialog.order.originalTotal ?? 0)}</span>

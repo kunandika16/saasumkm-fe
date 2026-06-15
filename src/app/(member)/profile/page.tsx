@@ -124,7 +124,7 @@ export default function ProfilePage() {
     return (
       <div className="flex min-h-[60vh] items-center justify-center px-4">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-3 border-primary border-t-transparent" />
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
           <p className="text-sm text-muted-foreground">Memuat data...</p>
         </div>
       </div>
@@ -164,10 +164,17 @@ export default function ProfilePage() {
   return (
     <div className="mx-auto w-full max-w-md px-4 pt-6">
       {/* Page title */}
-      <h1 className="text-xl font-semibold text-foreground mb-6">Profil</h1>
+      <div className="mb-5 rounded-2xl border border-border/80 bg-card p-5 shadow-sm shadow-slate-900/5">
+        <p className="text-sm font-semibold uppercase tracking-[0.14em] text-primary">
+          Account
+        </p>
+        <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground">
+          Profil
+        </h1>
+      </div>
 
       {/* Member Info Section */}
-      <section className="rounded-xl border bg-card p-4 space-y-4 mb-6">
+      <section className="mb-6 space-y-4 rounded-2xl border border-border/80 bg-card p-5 shadow-sm shadow-slate-900/5">
         {/* Name with edit */}
         <div className="space-y-2">
           {isEditing ? (
@@ -269,7 +276,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Stats row */}
-        <div className="grid grid-cols-3 gap-3 pt-2 border-t">
+        <div className="grid grid-cols-3 gap-3 border-t pt-4">
           <div className="text-center">
             <p className="text-lg font-semibold text-primary tabular-nums">
               {(member.pointBalance ?? 0).toLocaleString("id-ID")}

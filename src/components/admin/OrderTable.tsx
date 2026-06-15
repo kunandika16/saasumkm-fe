@@ -1,7 +1,7 @@
 "use client";
 
 import { format } from "date-fns";
-import { id } from "date-fns/locale/id";
+import { id } from "date-fns/locale";
 import { Check, X, Eye } from "lucide-react";
 
 import { Order, OrderStatus } from "@/types";
@@ -64,7 +64,7 @@ export default function OrderTable({
 }: OrderTableProps) {
   if (orders.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-12 text-center">
+      <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/90 bg-card py-16 text-center shadow-sm shadow-slate-900/5">
         <p className="text-muted-foreground">Tidak ada order ditemukan.</p>
       </div>
     );
@@ -170,7 +170,7 @@ export default function OrderTable({
         {orders.map((order) => (
           <div
             key={order.id}
-            className="rounded-lg border bg-card p-4 space-y-3"
+            className="space-y-3 rounded-xl border border-border/80 bg-card p-4 shadow-sm shadow-slate-900/5"
           >
             <div className="flex items-start justify-between">
               <div>

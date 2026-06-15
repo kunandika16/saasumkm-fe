@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SettingsSkeleton } from "@/components/ui/loading-state";
 
 export default function AdminSettingsPage() {
   const [loading, setLoading] = useState(true);
@@ -211,40 +212,60 @@ export default function AdminSettingsPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
-    );
+    return <SettingsSkeleton />;
   }
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div>
-        <h1 className="text-2xl font-semibold">Pengaturan</h1>
-        <p className="text-sm text-muted-foreground">
-          Kelola pengaturan bisnis, poin, dan konfigurasi platform.
-        </p>
+    <div className="min-w-0 space-y-4 py-5">
+      <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-[0_18px_45px_-38px_rgba(15,23,42,0.75)]">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-sm font-black text-slate-900">
+              Pengaturan merchant
+            </p>
+            <p className="text-xs font-medium text-slate-500">
+              Bisnis, poin, voucher, dan review booster
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            {saveSuccess && (
+              <span className="text-sm font-semibold text-green-600">
+                Tersimpan
+              </span>
+            )}
+            <Button
+              onClick={handleSaveSettings}
+              disabled={saving}
+              className="h-10 rounded-xl bg-blue-500 px-4 text-white shadow-[0_16px_28px_-18px_rgba(37,99,235,0.9)] hover:bg-blue-600"
+            >
+              {saving ? (
+                <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="mr-1 h-4 w-4" />
+              )}
+              {saving ? "Menyimpan..." : "Simpan"}
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* Error Banner */}
       {error && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
           {error}
         </div>
       )}
 
       {/* Success Banner */}
       {saveSuccess && (
-        <div className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700">
+        <div className="rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-700">
           Pengaturan berhasil disimpan.
         </div>
       )}
 
       {/* Upload Error Banner */}
       {uploadError && (
-        <div className="rounded-md border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-700">
+        <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-700">
           {uploadError}
         </div>
       )}
@@ -253,7 +274,7 @@ export default function AdminSettingsPage() {
       <Card className="p-5">
         <div className="mb-4 flex items-center gap-2">
           <Building2 className="h-5 w-5 text-muted-foreground" />
-          <h2 className="text-lg font-medium">Informasi Bisnis</h2>
+          <h2 className="text-lg font-semibold">Informasi Bisnis</h2>
         </div>
 
         <div className="space-y-4">
@@ -288,7 +309,7 @@ export default function AdminSettingsPage() {
               placeholder="Deskripsi singkat bisnis Anda (maks. 500 karakter)"
               maxLength={500}
               rows={3}
-              className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="flex w-full rounded-lg border border-input bg-card px-3 py-2 text-sm shadow-sm shadow-slate-900/5 placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/15"
             />
             <p className="text-xs text-muted-foreground">
               {description.length}/500 karakter
@@ -305,15 +326,15 @@ export default function AdminSettingsPage() {
                 <img
                   src={logoUrl}
                   alt="Logo bisnis"
-                  className="h-16 w-16 rounded-lg border object-cover"
+                  className="h-16 w-16 rounded-xl border object-cover"
                 />
               ) : (
-                <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-dashed bg-muted/30">
+                <div className="flex h-16 w-16 items-center justify-center rounded-xl border border-dashed bg-muted/30">
                   <ImageIcon className="h-6 w-6 text-muted-foreground" />
                 </div>
               )}
               <label className="cursor-pointer">
-                <div className="inline-flex items-center gap-1.5 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground">
+                <div className="inline-flex items-center gap-1.5 rounded-lg border border-input bg-card px-3 py-2 text-sm font-semibold shadow-sm hover:bg-accent hover:text-accent-foreground">
                   {uploadingLogo ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
@@ -342,15 +363,15 @@ export default function AdminSettingsPage() {
                 <img
                   src={bannerUrl}
                   alt="Banner bisnis"
-                  className="h-24 w-full rounded-lg border object-cover"
+                  className="h-28 w-full rounded-xl border object-cover"
                 />
               ) : (
-                <div className="flex h-24 w-full items-center justify-center rounded-lg border border-dashed bg-muted/30">
+                <div className="flex h-28 w-full items-center justify-center rounded-xl border border-dashed bg-muted/30">
                   <ImageIcon className="h-8 w-8 text-muted-foreground" />
                 </div>
               )}
               <label className="cursor-pointer">
-                <div className="inline-flex items-center gap-1.5 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground">
+                <div className="inline-flex items-center gap-1.5 rounded-lg border border-input bg-card px-3 py-2 text-sm font-semibold shadow-sm hover:bg-accent hover:text-accent-foreground">
                   {uploadingBanner ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
@@ -375,7 +396,7 @@ export default function AdminSettingsPage() {
       <Card className="p-5">
         <div className="mb-4 flex items-center gap-2">
           <Coins className="h-5 w-5 text-muted-foreground" />
-          <h2 className="text-lg font-medium">Aturan Poin</h2>
+          <h2 className="text-lg font-semibold">Aturan Poin</h2>
         </div>
         <p className="mb-4 text-xs text-muted-foreground">
           Perubahan aturan poin hanya berlaku untuk transaksi baru (Req 8.7).
@@ -461,7 +482,7 @@ export default function AdminSettingsPage() {
       <Card className="p-5">
         <div className="mb-4 flex items-center gap-2">
           <Gift className="h-5 w-5 text-muted-foreground" />
-          <h2 className="text-lg font-medium">Welcome Voucher</h2>
+          <h2 className="text-lg font-semibold">Welcome Voucher</h2>
         </div>
         <p className="mb-4 text-xs text-muted-foreground">
           Voucher yang otomatis diberikan saat member baru mendaftar.
@@ -545,7 +566,7 @@ export default function AdminSettingsPage() {
       <Card className="p-5">
         <div className="mb-4 flex items-center gap-2">
           <MapPin className="h-5 w-5 text-muted-foreground" />
-          <h2 className="text-lg font-medium">Google Maps Review Booster</h2>
+          <h2 className="text-lg font-semibold">Google Maps Review Booster</h2>
         </div>
         <p className="mb-4 text-xs text-muted-foreground">
           URL Google Maps Place untuk fitur Review Booster. Member akan diarahkan
@@ -575,20 +596,6 @@ export default function AdminSettingsPage() {
         </div>
       </Card>
 
-      {/* Save Button */}
-      <div className="flex items-center gap-3">
-        <Button onClick={handleSaveSettings} disabled={saving}>
-          {saving ? (
-            <Loader2 className="mr-1 h-4 w-4 animate-spin" />
-          ) : (
-            <Save className="mr-1 h-4 w-4" />
-          )}
-          {saving ? "Menyimpan..." : "Simpan Pengaturan"}
-        </Button>
-        {saveSuccess && (
-          <span className="text-sm text-green-600">✓ Tersimpan</span>
-        )}
-      </div>
     </div>
   );
 }

@@ -98,10 +98,10 @@ export default function RewardForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       {/* Name */}
       <div className="space-y-1.5">
-        <label htmlFor="reward-name" className="text-sm font-medium">
+        <label htmlFor="reward-name" className="text-sm font-black text-slate-800">
           Nama Reward <span className="text-red-500">*</span>
         </label>
         <Input
@@ -111,21 +111,22 @@ export default function RewardForm({
           onChange={(e) => setName(e.target.value)}
           maxLength={100}
           aria-invalid={!!errors.name}
+          className="h-11 bg-white"
         />
         {errors.name && (
           <p className="text-xs text-red-500">{errors.name}</p>
         )}
-        <p className="text-xs text-muted-foreground">{name.length}/100</p>
+        <p className="text-xs font-medium text-slate-400">{name.length}/100</p>
       </div>
 
       {/* Description */}
       <div className="space-y-1.5">
-        <label htmlFor="reward-description" className="text-sm font-medium">
+        <label htmlFor="reward-description" className="text-sm font-black text-slate-800">
           Deskripsi
         </label>
         <textarea
           id="reward-description"
-          className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex min-h-28 w-full resize-none rounded-xl border border-input/85 bg-white px-3 py-3 text-sm shadow-sm shadow-slate-900/5 outline-none transition-all placeholder:text-muted-foreground/75 hover:border-primary/30 focus:border-ring focus:ring-4 focus:ring-ring/15 disabled:cursor-not-allowed disabled:opacity-50"
           placeholder="Deskripsi reward (opsional)"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -135,90 +136,92 @@ export default function RewardForm({
         {errors.description && (
           <p className="text-xs text-red-500">{errors.description}</p>
         )}
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs font-medium text-slate-400">
           {description.length}/500
         </p>
       </div>
 
-      {/* Required Points */}
-      <div className="space-y-1.5">
-        <label htmlFor="reward-points" className="text-sm font-medium">
-          Poin yang Dibutuhkan <span className="text-red-500">*</span>
-        </label>
-        <Input
-          id="reward-points"
-          type="number"
-          min={1}
-          placeholder="Contoh: 10"
-          value={requiredPoints}
-          onChange={(e) => setRequiredPoints(e.target.value)}
-          aria-invalid={!!errors.requiredPoints}
-        />
-        {errors.requiredPoints && (
-          <p className="text-xs text-red-500">{errors.requiredPoints}</p>
-        )}
-      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        {/* Required Points */}
+        <div className="space-y-1.5">
+          <label htmlFor="reward-points" className="text-sm font-black text-slate-800">
+            Poin yang Dibutuhkan <span className="text-red-500">*</span>
+          </label>
+          <Input
+            id="reward-points"
+            type="number"
+            min={1}
+            placeholder="Contoh: 10"
+            value={requiredPoints}
+            onChange={(e) => setRequiredPoints(e.target.value)}
+            aria-invalid={!!errors.requiredPoints}
+            className="h-11 bg-white"
+          />
+          {errors.requiredPoints && (
+            <p className="text-xs text-red-500">{errors.requiredPoints}</p>
+          )}
+        </div>
 
-      {/* Stock Quantity */}
-      <div className="space-y-1.5">
-        <label htmlFor="reward-stock" className="text-sm font-medium">
-          Stok <span className="text-red-500">*</span>
-        </label>
-        <Input
-          id="reward-stock"
-          type="number"
-          min={0}
-          placeholder="Contoh: 50"
-          value={stockQuantity}
-          onChange={(e) => setStockQuantity(e.target.value)}
-          aria-invalid={!!errors.stockQuantity}
-        />
-        {errors.stockQuantity && (
-          <p className="text-xs text-red-500">{errors.stockQuantity}</p>
-        )}
+        {/* Stock Quantity */}
+        <div className="space-y-1.5">
+          <label htmlFor="reward-stock" className="text-sm font-black text-slate-800">
+            Stok <span className="text-red-500">*</span>
+          </label>
+          <Input
+            id="reward-stock"
+            type="number"
+            min={0}
+            placeholder="Contoh: 50"
+            value={stockQuantity}
+            onChange={(e) => setStockQuantity(e.target.value)}
+            aria-invalid={!!errors.stockQuantity}
+            className="h-11 bg-white"
+          />
+          {errors.stockQuantity && (
+            <p className="text-xs text-red-500">{errors.stockQuantity}</p>
+          )}
+        </div>
       </div>
 
       {/* Active Status */}
-      <div className="flex items-center gap-3">
-        <label htmlFor="reward-active" className="text-sm font-medium">
-          Status Aktif
-        </label>
+      <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+        <div>
+          <label htmlFor="reward-active" className="text-sm font-black text-slate-800">
+            Status Aktif
+          </label>
+          <p className="text-xs font-medium text-slate-500">
+            Reward aktif bisa ditukar oleh member.
+          </p>
+        </div>
         <button
           id="reward-active"
           type="button"
           role="switch"
           aria-checked={isActive}
           onClick={() => setIsActive(!isActive)}
-          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-            isActive ? "bg-primary" : "bg-input"
-          }`}
+          className={`relative h-8 w-14 shrink-0 rounded-full transition ${isActive ? "bg-emerald-500" : "bg-slate-300"}`}
         >
           <span
-            className={`pointer-events-none block h-4 w-4 rounded-full bg-background shadow-lg transition-transform ${
-              isActive ? "translate-x-5" : "translate-x-0.5"
-            }`}
+            className={`absolute top-1 h-6 w-6 rounded-full bg-white shadow transition ${isActive ? "left-7" : "left-1"}`}
           />
         </button>
-        <span className="text-xs text-muted-foreground">
-          {isActive ? "Aktif" : "Nonaktif"}
-        </span>
       </div>
 
       {/* Submit Error */}
       {submitError && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700">
           {submitError}
         </div>
       )}
 
       {/* Actions */}
-      <div className="flex items-center gap-2 pt-2">
-        <Button type="submit" disabled={loading}>
+      <div className="-mx-7 -mb-6 flex flex-col-reverse gap-2 border-t border-slate-200 bg-slate-50/90 px-7 py-5 sm:flex-row sm:justify-end">
+        <Button type="button" variant="outline" onClick={onCancel} disabled={loading} className="h-11 px-5">
+          Batal
+        </Button>
+        <Button type="submit" disabled={loading} className="h-11 px-5">
           {loading && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
           {isEdit ? "Simpan Perubahan" : "Buat Reward"}
-        </Button>
-        <Button type="button" variant="outline" onClick={onCancel} disabled={loading}>
-          Batal
         </Button>
       </div>
     </form>

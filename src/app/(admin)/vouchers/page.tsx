@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { format } from "date-fns";
-import { id } from "date-fns/locale/id";
+import { id } from "date-fns/locale";
 import {
   Loader2,
   Plus,
@@ -28,16 +28,10 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
 import VoucherForm, {
   type CreateVoucherInput,
 } from "@/components/admin/VoucherForm";
+import { AdminCardGridSkeleton } from "@/components/ui/loading-state";
 
 // ─── Helper: Compute stats from voucher fields ──────────────────────────────
 
@@ -55,7 +49,7 @@ export default function AdminVouchersPage() {
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Create voucher sheet state
+  // Create voucher dialog state
   const [sheetOpen, setSheetOpen] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -162,30 +156,32 @@ export default function AdminVouchersPage() {
   // ─── Render ─────────────────────────────────────────────────────────────
 
   return (
-    <div className="space-y-4">
-      {/* Page Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Vouchers</h1>
-          <p className="text-sm text-muted-foreground">
-            Kelola voucher diskon untuk pelanggan Anda.
-          </p>
+    <div className="min-w-0 space-y-4 py-5">
+      <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-[0_18px_45px_-38px_rgba(15,23,42,0.75)]">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-sm font-black text-slate-900">Kelola voucher</p>
+            <p className="text-xs font-medium text-slate-500">
+              Buat dan pantau promo pelanggan
+            </p>
+          </div>
+          <Button
+            size="sm"
+            onClick={() => {
+              setServerError(null);
+              setSheetOpen(true);
+            }}
+            className="h-10 rounded-xl bg-blue-500 px-4 text-white shadow-[0_16px_28px_-18px_rgba(37,99,235,0.9)] hover:bg-blue-600"
+          >
+            <Plus className="mr-1 h-4 w-4" />
+            Buat Voucher
+          </Button>
         </div>
-        <Button
-          size="sm"
-          onClick={() => {
-            setServerError(null);
-            setSheetOpen(true);
-          }}
-        >
-          <Plus className="h-4 w-4 mr-1" />
-          Buat Voucher
-        </Button>
       </div>
 
       {/* Stats Cards */}
       {!loading && vouchers.length > 0 && (
-        <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <StatCard
             icon={<Ticket className="h-4 w-4" />}
             label="Total Issued"
@@ -211,11 +207,9 @@ export default function AdminVouchersPage() {
 
       {/* Content */}
       {loading ? (
-        <div className="flex items-center justify-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </div>
+        <AdminCardGridSkeleton cards={6} />
       ) : vouchers.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/90 bg-card py-16 text-center shadow-sm shadow-slate-900/5">
           <Ticket className="h-12 w-12 text-muted-foreground/50 mb-3" />
           <p className="text-muted-foreground">
             Belum ada voucher. Buat voucher pertama untuk menarik pelanggan.
@@ -232,7 +226,7 @@ export default function AdminVouchersPage() {
           </Button>
         </div>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {vouchers.map((voucher) => (
             <VoucherCard
               key={voucher.id}
@@ -243,23 +237,23 @@ export default function AdminVouchersPage() {
         </div>
       )}
 
-      {/* Create Voucher Sheet */}
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="right" className="overflow-y-auto sm:max-w-md">
-          <SheetHeader>
-            <SheetTitle>Buat Voucher Baru</SheetTitle>
-            <SheetDescription>
+      {/* Create Voucher Dialog */}
+      <Dialog open={sheetOpen} onOpenChange={setSheetOpen}>
+        <DialogContent className="max-h-[88vh] overflow-y-auto p-0 sm:max-w-2xl">
+          <DialogHeader className="border-b border-slate-200 bg-[linear-gradient(135deg,#ffffff_0%,#fff7ed_52%,#f0f9ff_100%)] px-7 py-6">
+            <DialogTitle>Buat Voucher Baru</DialogTitle>
+            <DialogDescription>
               Isi detail voucher diskon untuk pelanggan.
-            </SheetDescription>
-          </SheetHeader>
-          <div className="px-4 pb-4">
+            </DialogDescription>
+          </DialogHeader>
+          <div className="px-7 py-6">
             <VoucherForm
               onSubmit={handleCreateVoucher}
               serverError={serverError}
             />
           </div>
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
 
       {/* Deactivate Confirmation Dialog */}
       <Dialog
@@ -325,8 +319,8 @@ interface StatCardProps {
 
 function StatCard({ icon, label, value }: StatCardProps) {
   return (
-    <div className="flex items-center gap-3 rounded-lg border bg-card p-4">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+    <div className="flex items-center gap-3 rounded-xl border border-border/80 bg-card p-4 shadow-sm shadow-slate-900/5">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
         {icon}
       </div>
       <div className="min-w-0">
@@ -375,9 +369,9 @@ function VoucherCard({ voucher, onDeactivate }: VoucherCardProps) {
       : formatIDR(voucher.discountValue);
 
   return (
-    <div className="flex flex-col rounded-lg border bg-card overflow-hidden">
+    <div className="flex flex-col overflow-hidden rounded-xl border border-border/80 bg-card shadow-sm shadow-slate-900/5 transition-all hover:-translate-y-0.5 hover:shadow-md">
       {/* Header */}
-      <div className="flex items-center justify-between border-b px-4 py-3">
+      <div className="flex items-center justify-between border-b bg-muted/35 px-4 py-3">
         <div className="flex items-center gap-2 min-w-0">
           <Ticket className="h-4 w-4 shrink-0 text-primary" />
           <span className="font-mono font-semibold text-sm truncate">
@@ -391,7 +385,7 @@ function VoucherCard({ voucher, onDeactivate }: VoucherCardProps) {
       <div className="flex-1 p-4 space-y-3">
         {/* Discount Info */}
         <div className="text-center">
-          <p className="text-2xl font-bold text-primary">{discountDisplay}</p>
+        <p className="text-3xl font-bold tracking-tight text-primary">{discountDisplay}</p>
           <p className="text-xs text-muted-foreground">
             {voucher.discountType === DiscountType.PERCENTAGE
               ? "Diskon Persentase"

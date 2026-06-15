@@ -145,7 +145,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-background">
       {/* Banner Image */}
       {tenant.bannerUrl && (
-        <div className="relative w-full aspect-[16/9] overflow-hidden bg-muted">
+        <div className="relative w-full aspect-[16/9] overflow-hidden bg-muted sm:aspect-[2.4/1]">
           <Image
             src={tenant.bannerUrl}
             alt={`${tenant.businessName} banner`}
@@ -158,12 +158,12 @@ export default function LandingPage() {
       )}
 
       {/* Logo + Business Info */}
-      <div className="px-4 pb-6">
+      <div className="mx-auto max-w-3xl px-4 pb-6">
         {/* Logo */}
         {tenant.logoUrl && (
           <div
             className={cn(
-              "mx-auto flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-4 border-background bg-muted shadow-md",
+              "mx-auto flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl border-4 border-background bg-muted shadow-xl shadow-slate-950/12",
               tenant.bannerUrl ? "-mt-10 relative z-10" : "mt-6"
             )}
           >
@@ -180,7 +180,7 @@ export default function LandingPage() {
         {/* Business Name */}
         <h1
           className={cn(
-            "text-center text-xl font-bold text-foreground",
+            "text-center text-3xl font-bold tracking-tight text-foreground",
             tenant.logoUrl ? "mt-3" : "mt-6"
           )}
         >
@@ -189,7 +189,7 @@ export default function LandingPage() {
 
         {/* Description (max 500 chars) */}
         {tenant.description && (
-          <p className="mt-2 text-center text-sm leading-relaxed text-muted-foreground max-w-prose mx-auto">
+          <p className="mx-auto mt-3 max-w-prose text-center text-sm leading-6 text-muted-foreground">
             {tenant.description.slice(0, 500)}
           </p>
         )}
@@ -201,7 +201,7 @@ export default function LandingPage() {
               href={tenant.locationMapUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-h-tap-target min-w-tap-target items-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted active:bg-muted/80"
+              className="inline-flex min-h-tap-target min-w-tap-target items-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-semibold text-foreground shadow-sm shadow-slate-900/5 transition-colors hover:bg-muted active:bg-muted/80"
               aria-label="Lihat lokasi di Google Maps"
             >
               <MapPin className="h-4 w-4 text-primary shrink-0" />
@@ -223,7 +223,7 @@ export default function LandingPage() {
                     href={url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex min-h-tap-target min-w-tap-target items-center justify-center rounded-full border border-border p-2.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:bg-muted/80"
+                    className="inline-flex min-h-tap-target min-w-tap-target items-center justify-center rounded-xl border border-border bg-card p-2.5 text-muted-foreground shadow-sm shadow-slate-900/5 transition-colors hover:bg-muted hover:text-foreground active:bg-muted/80"
                     aria-label={`Kunjungi ${label}`}
                   >
                     <Icon className="h-5 w-5" />
@@ -237,8 +237,8 @@ export default function LandingPage() {
 
       {/* Active Promotions Section */}
       {promotions.length > 0 && (
-        <section className="px-4 pb-8" aria-label="Promo aktif">
-          <h2 className="mb-3 text-base font-semibold text-foreground">
+        <section className="mx-auto max-w-3xl px-4 pb-8" aria-label="Promo aktif">
+          <h2 className="mb-3 text-lg font-bold tracking-tight text-foreground">
             Promo Aktif
           </h2>
           <div className="space-y-3">

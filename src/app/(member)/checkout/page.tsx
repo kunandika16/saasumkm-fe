@@ -110,7 +110,7 @@ export default function CheckoutPage() {
   // Show payment barcode after successful checkout
   if (completedOrder) {
     return (
-      <div className="mx-auto max-w-md px-4 pt-4 pb-4">
+      <div className="mx-auto max-w-md px-4 pt-5 pb-4">
         <PaymentBarcode
           paymentBarcode={completedOrder.paymentBarcode ?? ""}
           orderId={completedOrder.orderId ?? ""}
@@ -146,9 +146,9 @@ export default function CheckoutPage() {
   const availableItems = items.filter((item) => item.isAvailable);
 
   return (
-    <div className="mx-auto max-w-md px-4 pt-4 pb-36">
+    <div className="mx-auto max-w-md px-4 pt-5 pb-36">
       {/* Header with back button */}
-      <div className="flex items-center gap-3 mb-4">
+      <div className="mb-4 flex items-center gap-3 rounded-2xl border border-border/80 bg-card p-4 shadow-sm shadow-slate-900/5">
         <Link href="/order">
           <Button
             variant="ghost"
@@ -159,12 +159,19 @@ export default function CheckoutPage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
         </Link>
-        <h1 className="text-lg font-bold text-foreground">Checkout</h1>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+            Payment
+          </p>
+          <h1 className="text-xl font-bold tracking-tight text-foreground">
+            Checkout
+          </h1>
+        </div>
       </div>
 
       {/* Order summary */}
       <Card className="mb-3">
-        <CardHeader className="pb-2 pt-3 px-4">
+        <CardHeader className="px-4 pb-2 pt-3">
           <CardTitle className="text-sm font-semibold">Ringkasan Pesanan</CardTitle>
         </CardHeader>
         <CardContent className="px-4 pb-3">
@@ -175,14 +182,14 @@ export default function CheckoutPage() {
                 className="flex items-center justify-between py-2"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-foreground truncate">
+                  <p className="truncate text-sm font-medium text-foreground">
                     {item.name}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {formatIDR(item.price)} × {item.quantity}
                   </p>
                 </div>
-                <span className="text-sm font-medium text-foreground shrink-0 ml-3">
+                <span className="ml-3 shrink-0 text-sm font-medium text-foreground">
                   {formatIDR(item.price * item.quantity)}
                 </span>
               </li>
@@ -204,7 +211,7 @@ export default function CheckoutPage() {
 
       {/* Price breakdown */}
       <Card className="mb-4">
-        <CardContent className="py-3 px-4">
+        <CardContent className="px-4 py-3">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Subtotal</span>

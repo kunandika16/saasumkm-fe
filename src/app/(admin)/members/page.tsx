@@ -2,11 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { format } from "date-fns";
-import { id } from "date-fns/locale/id";
+import { id } from "date-fns/locale";
 import {
   ChevronLeft,
   ChevronRight,
-  Loader2,
   Search,
   Users,
 } from "lucide-react";
@@ -17,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { AdminTableSkeleton } from "@/components/ui/loading-state";
 
 const PAGE_SIZE = 20;
 
@@ -69,37 +69,31 @@ export default function AdminMembersPage() {
   });
 
   return (
-    <div className="space-y-4">
-      {/* Page Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Members</h1>
-          <p className="text-sm text-muted-foreground">
-            Daftar member yang terdaftar di platform.
-          </p>
+    <div className="min-w-0 space-y-4 py-5">
+      <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-[0_18px_45px_-38px_rgba(15,23,42,0.75)]">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0">
+            <p className="text-sm font-black text-slate-900">Data member</p>
+            <p className="text-xs font-medium text-slate-500">
+              {total} member terdaftar
+            </p>
+          </div>
+          <div className="relative w-full lg:max-w-sm">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-sky-500" />
+            <Input
+              placeholder="Cari nama atau nomor WhatsApp..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="h-10 rounded-xl border-slate-200 bg-slate-50/80 pl-9"
+              aria-label="Cari member"
+            />
+          </div>
         </div>
-        <Badge variant="secondary" className="self-start sm:self-auto">
-          {total} member
-        </Badge>
-      </div>
-
-      {/* Search */}
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Cari nama atau nomor WhatsApp..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-9"
-          aria-label="Cari member"
-        />
       </div>
 
       {/* Content */}
       {loading ? (
-        <div className="flex items-center justify-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </div>
+        <AdminTableSkeleton rows={7} columns={6} />
       ) : filteredMembers.length === 0 ? (
         <Card className="flex flex-col items-center justify-center py-16 text-center">
           <Users className="mb-3 h-10 w-10 text-muted-foreground" />
@@ -117,10 +111,10 @@ export default function AdminMembersPage() {
       ) : (
         <>
           {/* Table - desktop */}
-          <div className="hidden overflow-x-auto rounded-lg border md:block">
+          <div className="hidden overflow-x-auto rounded-xl border border-border/80 bg-card shadow-sm shadow-slate-900/5 md:block">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b bg-muted/50">
+                <tr className="border-b bg-muted/60">
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground">
                     Nama
                   </th>
@@ -145,7 +139,7 @@ export default function AdminMembersPage() {
                 {filteredMembers.map((member) => (
                   <tr
                     key={member.id}
-                    className="border-b last:border-b-0 hover:bg-muted/30"
+                    className="border-b last:border-b-0 hover:bg-muted/45"
                   >
                     <td className="px-4 py-3 font-medium">{member.name}</td>
                     <td className="px-4 py-3 text-muted-foreground">

@@ -142,17 +142,17 @@ export default function VoucherForm({ onSubmit, serverError }: VoucherFormProps)
   }
 
   return (
-    <form onSubmit={handleFormSubmit} className="space-y-4">
+    <form onSubmit={handleFormSubmit} className="space-y-5">
       {/* Server Error */}
       {serverError && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700">
           {serverError}
         </div>
       )}
 
       {/* Voucher Code */}
       <div className="space-y-1.5">
-        <label htmlFor="voucher-code" className="text-sm font-medium">
+        <label htmlFor="voucher-code" className="text-sm font-black text-slate-800">
           Kode Voucher <span className="text-red-500">*</span>
         </label>
         <Input
@@ -161,7 +161,7 @@ export default function VoucherForm({ onSubmit, serverError }: VoucherFormProps)
           value={code}
           onChange={(e) => setCode(e.target.value)}
           aria-invalid={!!errors.code}
-          className="uppercase"
+          className="h-11 bg-white uppercase"
           maxLength={20}
         />
         {errors.code && (
@@ -169,104 +169,113 @@ export default function VoucherForm({ onSubmit, serverError }: VoucherFormProps)
         )}
       </div>
 
-      {/* Discount Type */}
-      <div className="space-y-1.5">
-        <label htmlFor="discount-type" className="text-sm font-medium">
-          Tipe Diskon <span className="text-red-500">*</span>
-        </label>
-        <Select
-          value={discountType}
-          onValueChange={(val: string | null) => {
-            if (val) setDiscountType(val as DiscountType);
-          }}
-        >
-          <SelectTrigger
-            id="discount-type"
-            className="w-full"
-            aria-label="Pilih tipe diskon"
+      <div className="grid gap-4 sm:grid-cols-2">
+        {/* Discount Type */}
+        <div className="space-y-1.5">
+          <label htmlFor="discount-type" className="text-sm font-black text-slate-800">
+            Tipe Diskon <span className="text-red-500">*</span>
+          </label>
+          <Select
+            value={discountType}
+            onValueChange={(val: string | null) => {
+              if (val) setDiscountType(val as DiscountType);
+            }}
           >
-            <SelectValue placeholder="Pilih tipe diskon" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={DiscountType.PERCENTAGE}>
-              Persentase (%)
-            </SelectItem>
-            <SelectItem value={DiscountType.FIXED}>
-              Nominal Tetap (Rp)
-            </SelectItem>
-          </SelectContent>
-        </Select>
-        {errors.discountType && (
-          <p className="text-xs text-red-500">{errors.discountType}</p>
-        )}
+            <SelectTrigger
+              id="discount-type"
+              className="h-11 w-full bg-white"
+              aria-label="Pilih tipe diskon"
+            >
+              <SelectValue placeholder="Pilih tipe diskon" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={DiscountType.PERCENTAGE}>
+                Persentase (%)
+              </SelectItem>
+              <SelectItem value={DiscountType.FIXED}>
+                Nominal Tetap (Rp)
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          {errors.discountType && (
+            <p className="text-xs text-red-500">{errors.discountType}</p>
+          )}
+        </div>
+
+        {/* Discount Value */}
+        <div className="space-y-1.5">
+          <label htmlFor="discount-value" className="text-sm font-black text-slate-800">
+            Nilai Diskon{" "}
+            <span className="font-medium text-slate-400">
+              {discountType === DiscountType.PERCENTAGE
+                ? "(1 - 100%)"
+                : "(Rp)"}
+            </span>
+          </label>
+          <Input
+            id="discount-value"
+            type="number"
+            placeholder={
+              discountType === DiscountType.PERCENTAGE ? "50" : "25000"
+            }
+            value={discountValue}
+            onChange={(e) => setDiscountValue(e.target.value)}
+            aria-invalid={!!errors.discountValue}
+            className="h-11 bg-white"
+          />
+          {errors.discountValue && (
+            <p className="text-xs text-red-500">{errors.discountValue}</p>
+          )}
+        </div>
       </div>
 
-      {/* Discount Value */}
-      <div className="space-y-1.5">
-        <label htmlFor="discount-value" className="text-sm font-medium">
-          Nilai Diskon{" "}
-          <span className="text-muted-foreground font-normal">
-            {discountType === DiscountType.PERCENTAGE
-              ? "(1 - 100%)"
-              : "(Rp 1.000 - Rp 10.000.000)"}
-          </span>
-        </label>
-        <Input
-          id="discount-value"
-          type="number"
-          placeholder={
-            discountType === DiscountType.PERCENTAGE ? "50" : "25000"
-          }
-          value={discountValue}
-          onChange={(e) => setDiscountValue(e.target.value)}
-          aria-invalid={!!errors.discountValue}
-        />
-        {errors.discountValue && (
-          <p className="text-xs text-red-500">{errors.discountValue}</p>
-        )}
-      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        {/* Expiry Date */}
+        <div className="space-y-1.5">
+          <label htmlFor="expiry-date" className="text-sm font-black text-slate-800">
+            Tanggal Kadaluarsa <span className="text-red-500">*</span>
+          </label>
+          <Input
+            id="expiry-date"
+            type="date"
+            value={expiryDate}
+            onChange={(e) => setExpiryDate(e.target.value)}
+            aria-invalid={!!errors.expiryDate}
+            className="h-11 bg-white"
+          />
+          {errors.expiryDate && (
+            <p className="text-xs text-red-500">{errors.expiryDate}</p>
+          )}
+        </div>
 
-      {/* Expiry Date */}
-      <div className="space-y-1.5">
-        <label htmlFor="expiry-date" className="text-sm font-medium">
-          Tanggal Kadaluarsa <span className="text-red-500">*</span>
-        </label>
-        <Input
-          id="expiry-date"
-          type="date"
-          value={expiryDate}
-          onChange={(e) => setExpiryDate(e.target.value)}
-          aria-invalid={!!errors.expiryDate}
-        />
-        {errors.expiryDate && (
-          <p className="text-xs text-red-500">{errors.expiryDate}</p>
-        )}
-      </div>
-
-      {/* Max Usage */}
-      <div className="space-y-1.5">
-        <label htmlFor="max-usage" className="text-sm font-medium">
-          Maks Penggunaan <span className="text-red-500">*</span>
-        </label>
-        <Input
-          id="max-usage"
-          type="number"
-          placeholder="100"
-          min={1}
-          value={maxUsage}
-          onChange={(e) => setMaxUsage(e.target.value)}
-          aria-invalid={!!errors.maxUsage}
-        />
-        {errors.maxUsage && (
-          <p className="text-xs text-red-500">{errors.maxUsage}</p>
-        )}
+        {/* Max Usage */}
+        <div className="space-y-1.5">
+          <label htmlFor="max-usage" className="text-sm font-black text-slate-800">
+            Maks Penggunaan <span className="text-red-500">*</span>
+          </label>
+          <Input
+            id="max-usage"
+            type="number"
+            placeholder="100"
+            min={1}
+            value={maxUsage}
+            onChange={(e) => setMaxUsage(e.target.value)}
+            aria-invalid={!!errors.maxUsage}
+            className="h-11 bg-white"
+          />
+          {errors.maxUsage && (
+            <p className="text-xs text-red-500">{errors.maxUsage}</p>
+          )}
+        </div>
       </div>
 
       {/* Submit */}
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
-        {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
-        Buat Voucher
-      </Button>
+      <div className="-mx-7 -mb-6 flex justify-end border-t border-slate-200 bg-slate-50/90 px-7 py-5">
+        <Button type="submit" className="h-11 px-5" disabled={isSubmitting}>
+          {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
+          Buat Voucher
+        </Button>
+      </div>
     </form>
   );
 }

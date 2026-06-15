@@ -11,7 +11,7 @@ import apiClient from "@/lib/api-client";
 import { storeTokens } from "@/lib/auth";
 import { RegisterSchema, type RegisterInput } from "@/lib/validators/member";
 import { formatIDR } from "@/lib/utils";
-import type { AuthResponse, ApiError, Voucher, TenantSettings } from "@/types";
+import type { ApiError, Voucher, TenantSettings } from "@/types";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -132,11 +132,11 @@ function RegisterForm() {
   // Success state — show welcome voucher
   if (registrationSuccess && welcomeVoucher) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4 py-8">
+      <div className="flex min-h-screen items-center justify-center px-4 py-8">
         <Card className="w-full max-w-sm">
           <CardHeader className="text-center">
-            <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
-              <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+            <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100">
+              <CheckCircle className="h-6 w-6 text-emerald-600" />
             </div>
             <CardTitle>Registrasi Berhasil!</CardTitle>
             <CardDescription>
@@ -144,7 +144,7 @@ function RegisterForm() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="rounded-lg border border-dashed border-primary/50 bg-primary/5 p-4">
+            <div className="rounded-xl border border-dashed border-primary/50 bg-primary/5 p-4">
               <div className="flex items-center gap-2 mb-2">
                 <Gift className="h-5 w-5 text-primary" />
                 <span className="text-sm font-medium text-primary">
@@ -189,10 +189,13 @@ function RegisterForm() {
 
   // Registration form
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-8">
+    <div className="flex min-h-screen items-center justify-center px-4 py-8">
       <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>Daftar Member</CardTitle>
+        <CardHeader className="text-center">
+          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+            <Gift className="h-6 w-6 text-primary" />
+          </div>
+          <CardTitle className="text-2xl">Daftar Member</CardTitle>
           <CardDescription>
             Daftarkan diri Anda untuk mulai mengumpulkan poin dan menikmati
             promo eksklusif
