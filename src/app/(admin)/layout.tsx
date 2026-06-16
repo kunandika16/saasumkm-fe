@@ -33,6 +33,7 @@ import { isAuthenticated, clearTokens } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { LoadingState } from "@/components/ui/loading-state";
+import { ApiHealthStatus } from "@/components/admin/ApiHealthStatus";
 
 interface NavItem {
   label: string;
@@ -255,6 +256,7 @@ export default function AdminLayout({
               />
             </div>
             <div className="relative ml-auto flex items-center gap-1.5 text-slate-500">
+              <ApiHealthStatus />
               <Button
                 variant="ghost"
                 size="icon"

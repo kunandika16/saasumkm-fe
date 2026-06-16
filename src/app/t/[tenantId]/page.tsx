@@ -37,10 +37,10 @@ export default function TenantEntryPage({
           setStatus("redirecting");
           router.replace("/home");
         } else {
-          // Not authenticated — redirect to registration with tenantId
+          // Not authenticated — let existing members log in, with a path to register.
           setStatus("redirecting");
           router.replace(
-            `/register?tenantId=${encodeURIComponent(tenantId)}&method=${encodeURIComponent(accessMethod)}`
+            `/member-login?tenantId=${encodeURIComponent(tenantId)}&method=${encodeURIComponent(accessMethod)}`
           );
         }
       } catch {

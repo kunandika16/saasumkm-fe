@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,7 +14,7 @@ import { RegisterSchema, type RegisterInput } from "@/lib/validators/member";
 import { formatIDR } from "@/lib/utils";
 import type { ApiError, Voucher, TenantSettings } from "@/types";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Card,
@@ -128,6 +129,10 @@ function RegisterForm() {
   function handleContinueToHome() {
     router.replace("/home");
   }
+
+  const loginHref = `/member-login?tenantId=${encodeURIComponent(
+    tenantId
+  )}&method=${encodeURIComponent(accessMethod)}`;
 
   // Success state — show welcome voucher
   if (registrationSuccess && welcomeVoucher) {
@@ -286,6 +291,17 @@ function RegisterForm() {
               )}
             </Button>
           </form>
+          <div className="mt-4 border-t border-border pt-4">
+            <Link
+              href={loginHref}
+              className={buttonVariants({
+                variant: "outline",
+                className: "w-full",
+              })}
+            >
+              Sudah terdaftar? Masuk
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </div>

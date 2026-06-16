@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 import apiClient from "@/lib/api-client";
-import type { TenantSettings } from "@/types";
+import type { Tenant, TenantSettings } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -52,6 +52,11 @@ export default function AdminSettingsPage() {
   const [description, setDescription] = useState("");
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [bannerUrl, setBannerUrl] = useState<string | null>(null);
+  const [locationMapUrl, setLocationMapUrl] = useState("");
+  const [instagramUrl, setInstagramUrl] = useState("");
+  const [facebookUrl, setFacebookUrl] = useState("");
+  const [tiktokUrl, setTiktokUrl] = useState("");
+  const [whatsappUrl, setWhatsappUrl] = useState("");
 
   // Upload states
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -68,6 +73,8 @@ export default function AdminSettingsPage() {
             description?: string | null;
             logoUrl?: string | null;
             bannerUrl?: string | null;
+            locationMapUrl?: string | null;
+            socialLinks?: Record<string, string> | null;
           };
         }
       >("/api/admin/settings");
@@ -88,6 +95,11 @@ export default function AdminSettingsPage() {
           setDescription(s.tenant.description ?? "");
           setLogoUrl(s.tenant.logoUrl ?? null);
           setBannerUrl(s.tenant.bannerUrl ?? null);
+          setLocationMapUrl(s.tenant.locationMapUrl ?? "");
+          setInstagramUrl(s.tenant.socialLinks?.instagram ?? "");
+          setFacebookUrl(s.tenant.socialLinks?.facebook ?? "");
+          setTiktokUrl(s.tenant.socialLinks?.tiktok ?? "");
+          setWhatsappUrl(s.tenant.socialLinks?.whatsapp ?? "");
         }
       }
     } catch {
@@ -126,6 +138,7 @@ export default function AdminSettingsPage() {
       };
 
       await apiClient.patch("/api/admin/settings", payload);
+      await saveBranding();
       setSaveSuccess(true);
     } catch (err: unknown) {
       const error = err as {
@@ -139,13 +152,55 @@ export default function AdminSettingsPage() {
     }
   }
 
+  async function saveBranding(file?: File, type?: "logo" | "banner") {
+    const socialLinks = {
+      ...(instagramUrl.trim() ? { instagram: instagramUrl.trim() } : {}),
+      ...(facebookUrl.trim() ? { facebook: facebookUrl.trim() } : {}),
+      ...(tiktokUrl.trim() ? { tiktok: tiktokUrl.trim() } : {}),
+      ...(whatsappUrl.trim() ? { whatsapp: whatsappUrl.trim() } : {}),
+    };
+
+    const formData = new FormData();
+    formData.append("businessName", businessName.trim());
+    formData.append("description", description.trim());
+    formData.append("locationMapUrl", locationMapUrl.trim());
+    formData.append("socialLinks", JSON.stringify(socialLinks));
+
+    if (file && type) {
+      formData.append(type, file);
+    }
+
+    const { data } = await apiClient.patch<Tenant>(
+      "/api/admin/settings/branding",
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
+
+    setBusinessName(data.businessName ?? "");
+    setDescription(data.description ?? "");
+    setLogoUrl(data.logoUrl ?? null);
+    setBannerUrl(data.bannerUrl ?? null);
+    setLocationMapUrl(data.locationMapUrl ?? "");
+    setInstagramUrl(data.socialLinks?.instagram ?? "");
+    setFacebookUrl(data.socialLinks?.facebook ?? "");
+    setTiktokUrl(data.socialLinks?.tiktok ?? "");
+    setWhatsappUrl(data.socialLinks?.whatsapp ?? "");
+
+    return data;
+  }
+
   async function handleUpload(
     file: File,
     type: "logo" | "banner"
   ): Promise<string | null> {
-    // Validate file size (max 2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      setUploadError("Ukuran file maksimal 2MB.");
+    const maxSize = type === "banner" ? 5 * 1024 * 1024 : 2 * 1024 * 1024;
+
+    if (file.size > maxSize) {
+      setUploadError(
+        `Ukuran file maksimal ${type === "banner" ? "5MB" : "2MB"}.`
+      );
       return null;
     }
 
@@ -158,18 +213,12 @@ export default function AdminSettingsPage() {
 
     setUploadError(null);
 
-    const formData = new FormData();
-    formData.append("image", file);
-
     try {
       if (type === "logo") setUploadingLogo(true);
       else setUploadingBanner(true);
 
-      const { data } = await apiClient.post<{ url: string }>("/api/upload/image", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      return data.url;
+      const tenant = await saveBranding(file, type);
+      return type === "logo" ? tenant.logoUrl : tenant.bannerUrl;
     } catch {
       setUploadError(`Gagal mengunggah ${type === "logo" ? "logo" : "banner"}.`);
       return null;
@@ -186,12 +235,6 @@ export default function AdminSettingsPage() {
     const url = await handleUpload(file, "logo");
     if (url) {
       setLogoUrl(url);
-      // Save logo URL to settings/tenant
-      try {
-        await apiClient.patch("/api/admin/settings", { logoUrl: url });
-      } catch {
-        // Logo uploaded but save failed; still show the uploaded logo
-      }
     }
   }
 
@@ -202,12 +245,6 @@ export default function AdminSettingsPage() {
     const url = await handleUpload(file, "banner");
     if (url) {
       setBannerUrl(url);
-      // Save banner URL to settings/tenant
-      try {
-        await apiClient.patch("/api/admin/settings", { bannerUrl: url });
-      } catch {
-        // Banner uploaded but save failed; still show the uploaded banner
-      }
     }
   }
 
@@ -316,6 +353,83 @@ export default function AdminSettingsPage() {
             </p>
           </div>
 
+          {/* Location */}
+          <div className="space-y-1.5">
+            <label
+              htmlFor="locationMapUrl"
+              className="text-sm font-medium text-foreground"
+            >
+              Link Google Maps
+            </label>
+            <Input
+              id="locationMapUrl"
+              type="url"
+              value={locationMapUrl}
+              onChange={(e) => setLocationMapUrl(e.target.value)}
+              placeholder="https://maps.app.goo.gl/..."
+            />
+          </div>
+
+          {/* Social Links */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <label
+                htmlFor="instagramUrl"
+                className="text-sm font-medium text-foreground"
+              >
+                Instagram
+              </label>
+              <Input
+                id="instagramUrl"
+                value={instagramUrl}
+                onChange={(e) => setInstagramUrl(e.target.value)}
+                placeholder="https://instagram.com/..."
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label
+                htmlFor="facebookUrl"
+                className="text-sm font-medium text-foreground"
+              >
+                Facebook
+              </label>
+              <Input
+                id="facebookUrl"
+                value={facebookUrl}
+                onChange={(e) => setFacebookUrl(e.target.value)}
+                placeholder="https://facebook.com/..."
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label
+                htmlFor="tiktokUrl"
+                className="text-sm font-medium text-foreground"
+              >
+                TikTok
+              </label>
+              <Input
+                id="tiktokUrl"
+                value={tiktokUrl}
+                onChange={(e) => setTiktokUrl(e.target.value)}
+                placeholder="https://tiktok.com/@..."
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label
+                htmlFor="whatsappUrl"
+                className="text-sm font-medium text-foreground"
+              >
+                WhatsApp
+              </label>
+              <Input
+                id="whatsappUrl"
+                value={whatsappUrl}
+                onChange={(e) => setWhatsappUrl(e.target.value)}
+                placeholder="081234567890 atau https://wa.me/..."
+              />
+            </div>
+          </div>
+
           {/* Logo Upload */}
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground">
@@ -356,7 +470,7 @@ export default function AdminSettingsPage() {
           {/* Banner Upload */}
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground">
-              Banner (maks. 1920x600px, 2MB, JPG/PNG/WebP)
+              Banner (maks. 1920x600px, 5MB, JPG/PNG/WebP)
             </label>
             <div className="space-y-2">
               {bannerUrl ? (
