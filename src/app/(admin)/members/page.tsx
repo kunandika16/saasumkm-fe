@@ -6,7 +6,9 @@ import { id } from "date-fns/locale";
 import {
   ChevronLeft,
   ChevronRight,
+  MessageCircle,
   Search,
+  Send,
   Users,
 } from "lucide-react";
 
@@ -17,6 +19,9 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { AdminTableSkeleton } from "@/components/ui/loading-state";
+import { WhatsAppConnectionStatus } from "@/components/admin/WhatsAppConnectionStatus";
+import QRCodeModal from "@/components/admin/QRCodeModal";
+import BlastModal from "@/components/admin/BlastModal";
 
 const PAGE_SIZE = 20;
 
@@ -27,6 +32,14 @@ export default function AdminMembersPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+
+  // WhatsApp state
+  const [isConnected, setIsConnected] = useState(false);
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [showBlastModal, setShowBlastModal] = useState(false);
+  const [singleMember, setSingleMember] = useState<
+    { id: string; name: string; whatsapp: string } | undefined
+  >(undefined);
 
   const fetchMembers = useCallback(async () => {
     setLoading(true);
@@ -78,6 +91,32 @@ export default function AdminMembersPage() {
               {total} member terdaftar
             </p>
           </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <WhatsAppConnectionStatus
+              onConnect={() => setShowQRModal(true)}
+              onStatusChange={setIsConnected}
+            />
+            <div
+              title={
+                !isConnected
+                  ? "Hubungkan WhatsApp terlebih dahulu"
+                  : undefined
+              }
+            >
+              <Button
+                variant="default"
+                size="sm"
+                disabled={!isConnected}
+                onClick={() => setShowBlastModal(true)}
+                className="gap-1.5"
+              >
+                <Send className="h-4 w-4" />
+                Blast WhatsApp
+              </Button>
+            </div>
+          </div>
+        </div>
+        <div className="mt-3">
           <div className="relative w-full lg:max-w-sm">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-sky-500" />
             <Input
@@ -133,6 +172,9 @@ export default function AdminMembersPage() {
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground">
                     Kunjungan Terakhir
                   </th>
+                  <th className="px-4 py-3 text-center font-medium text-muted-foreground">
+                    Aksi
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -165,6 +207,32 @@ export default function AdminMembersPage() {
                           )
                         : "-"}
                     </td>
+                    <td className="px-4 py-3 text-center">
+                      {member.whatsapp && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={!isConnected}
+                          title={
+                            !isConnected
+                              ? "Hubungkan WhatsApp terlebih dahulu"
+                              : `Kirim pesan ke ${member.name}`
+                          }
+                          onClick={() => {
+                            setSingleMember({
+                              id: member.id,
+                              name: member.name,
+                              whatsapp: member.whatsapp,
+                            });
+                            setShowBlastModal(true);
+                          }}
+                          className="h-8 w-8 p-0"
+                          aria-label={`Send WhatsApp to ${member.name}`}
+                        >
+                          <MessageCircle className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -182,9 +250,35 @@ export default function AdminMembersPage() {
                       {member.whatsapp}
                     </p>
                   </div>
-                  <Badge variant="secondary">
-                    {member.pointBalance} poin
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    {member.whatsapp && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={!isConnected}
+                        title={
+                          !isConnected
+                            ? "Hubungkan WhatsApp terlebih dahulu"
+                            : `Kirim pesan ke ${member.name}`
+                        }
+                        onClick={() => {
+                          setSingleMember({
+                            id: member.id,
+                            name: member.name,
+                            whatsapp: member.whatsapp,
+                          });
+                          setShowBlastModal(true);
+                        }}
+                        className="h-8 w-8 p-0"
+                        aria-label={`Send WhatsApp to ${member.name}`}
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                      </Button>
+                    )}
+                    <Badge variant="secondary">
+                      {member.pointBalance} poin
+                    </Badge>
+                  </div>
                 </div>
                 <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
                   <span>{member.totalVisits} kunjungan</span>
@@ -230,6 +324,24 @@ export default function AdminMembersPage() {
           )}
         </>
       )}
+
+      {/* WhatsApp Modals */}
+      <QRCodeModal
+        isOpen={showQRModal}
+        onClose={() => setShowQRModal(false)}
+        onConnected={() => {
+          setShowQRModal(false);
+          setIsConnected(true);
+        }}
+      />
+      <BlastModal
+        isOpen={showBlastModal}
+        onClose={() => {
+          setShowBlastModal(false);
+          setSingleMember(undefined);
+        }}
+        singleMember={singleMember}
+      />
     </div>
   );
 }

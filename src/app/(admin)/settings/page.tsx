@@ -10,6 +10,7 @@ import {
   Coins,
   Gift,
   Building2,
+  Globe,
 } from "lucide-react";
 
 import apiClient from "@/lib/api-client";
@@ -58,6 +59,9 @@ export default function AdminSettingsPage() {
   const [tiktokUrl, setTiktokUrl] = useState("");
   const [whatsappUrl, setWhatsappUrl] = useState("");
 
+  // Landing page URL
+  const [landingPageUrl, setLandingPageUrl] = useState("");
+
   // Upload states
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingBanner, setUploadingBanner] = useState(false);
@@ -68,6 +72,7 @@ export default function AdminSettingsPage() {
     try {
       const { data } = await apiClient.get<
         TenantSettings & {
+          landingPageUrl?: string | null;
           tenant?: {
             businessName?: string;
             description?: string | null;
@@ -88,6 +93,7 @@ export default function AdminSettingsPage() {
         setWelcomeVoucherType(s.welcomeVoucherType ?? null);
         setWelcomeVoucherValue(s.welcomeVoucherValue ?? null);
         setWelcomeVoucherDays(s.welcomeVoucherDays ?? null);
+        setLandingPageUrl(s.landingPageUrl ?? "");
 
         // Populate tenant info if included in the response
         if (s.tenant) {
@@ -135,6 +141,7 @@ export default function AdminSettingsPage() {
         welcomeVoucherType: welcomeVoucherType || null,
         welcomeVoucherValue: welcomeVoucherValue || null,
         welcomeVoucherDays: welcomeVoucherDays || null,
+        landingPageUrl: landingPageUrl.trim() || null,
       };
 
       await apiClient.patch("/api/admin/settings", payload);
@@ -503,6 +510,39 @@ export default function AdminSettingsPage() {
               </label>
             </div>
           </div>
+        </div>
+      </Card>
+
+      {/* Landing Page Section */}
+      <Card className="p-5">
+        <div className="mb-4 flex items-center gap-2">
+          <Globe className="h-5 w-5 text-muted-foreground" />
+          <h2 className="text-lg font-semibold">Landing Page</h2>
+        </div>
+        <p className="mb-4 text-xs text-muted-foreground">
+          URL landing page custom untuk tenant ini. Halaman akan ditampilkan di
+          menu &ldquo;Landing&rdquo; member sebagai iframe (webview).
+        </p>
+
+        <div className="space-y-1.5">
+          <label
+            htmlFor="landingPageUrl"
+            className="text-sm font-medium text-foreground"
+          >
+            URL Landing Page
+          </label>
+          <Input
+            id="landingPageUrl"
+            type="url"
+            value={landingPageUrl}
+            onChange={(e) => setLandingPageUrl(e.target.value)}
+            placeholder="https://kopinusantara.sentuhpro.com"
+            maxLength={500}
+          />
+          <p className="text-xs text-muted-foreground">
+            Kosongkan untuk menggunakan landing page default. Pastikan domain
+            mengizinkan tampil di iframe (tanpa X-Frame-Options: DENY).
+          </p>
         </div>
       </Card>
 

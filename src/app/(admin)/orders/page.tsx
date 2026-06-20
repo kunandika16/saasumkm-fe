@@ -379,15 +379,13 @@ export default function AdminOrdersPage() {
                 </div>
               )}
 
-              {/* Barcode */}
-              {detailDialog.order.paymentBarcode && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Barcode Ref</span>
-                  <span className="font-mono text-xs">
-                    {detailDialog.order.paymentBarcode}
-                  </span>
-                </div>
-              )}
+              {/* Payment Method */}
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Metode Pembayaran</span>
+                <Badge variant="outline" className="capitalize">
+                  {detailDialog.order.paymentMethod ?? "-"}
+                </Badge>
+              </div>
 
               {/* Timestamps */}
               <div className="space-y-1 border-t pt-2 text-xs text-muted-foreground">

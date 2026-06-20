@@ -334,7 +334,7 @@ export default function ProfilePage() {
                 <RewardCard
                   key={reward.id}
                   reward={reward}
-                  onRedeemed={handleRewardRedeemed}
+                  onRedeemClick={handleRewardRedeemed}
                 />
               ))}
             </div>

@@ -11,9 +11,6 @@ import type { ApiError } from "@/types";
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
 
 // ─── Request Interceptor: Attach JWT ─────────────────────────────────────────
@@ -40,7 +37,15 @@ apiClient.interceptors.response.use(
       'success' in response.data &&
       'data' in response.data
     ) {
+      // Preserve warning field if present
+      const warning = response.data.warning;
       response.data = response.data.data;
+      if (warning) {
+        // Attach warning to the unwrapped data for downstream access
+        if (response.data && typeof response.data === 'object') {
+          response.data.warning = warning;
+        }
+      }
     }
     return response;
   }

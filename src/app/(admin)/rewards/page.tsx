@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Gift, Plus, Pencil } from "lucide-react";
+import Image from "next/image";
+import { Gift, Plus, Pencil, ImageIcon, TicketCheck } from "lucide-react";
 
 import apiClient from "@/lib/api-client";
 import type { Reward } from "@/types";
@@ -74,12 +75,38 @@ export default function AdminRewardsPage() {
   }
 
   async function handleSubmit(data: RewardFormData) {
+    // Build multipart FormData for the backend
+    const body = new FormData();
+    body.append("name", data.name);
+    body.append("description", data.description);
+    body.append("requiredPoints", data.requiredPoints.toString());
+    body.append("stockQuantity", data.stockQuantity.toString());
+    body.append("isActive", data.isActive.toString());
+    body.append("menuItemId", data.menuItemId);
+    body.append("discountType", data.discountType);
+
+    if (data.discountType === "discount") {
+      if (data.discountSubType) {
+        body.append("discountSubType", data.discountSubType);
+      }
+      if (data.discountValue != null) {
+        body.append("discountValue", data.discountValue.toString());
+      }
+    }
+
+    if (data.imageFile) {
+      body.append("image", data.imageFile);
+    } else if (data.imageUrl === null && editingReward?.imageUrl) {
+      // Explicitly remove existing image
+      body.append("imageUrl", "null");
+    }
+
     if (editingReward) {
       // Update existing reward
-      await apiClient.patch(`/api/admin/rewards/${editingReward.id}`, data);
+      await apiClient.patch(`/api/admin/rewards/${editingReward.id}`, body);
     } else {
       // Create new reward
-      await apiClient.post("/api/admin/rewards", data);
+      await apiClient.post("/api/admin/rewards", body);
     }
     setSheetOpen(false);
     setEditingReward(null);
@@ -130,27 +157,69 @@ export default function AdminRewardsPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {rewards.map((reward) => (
             <Card key={reward.id} className="flex flex-col p-4 transition-all hover:-translate-y-0.5 hover:shadow-md">
-              {/* Header */}
-              <div className="flex items-start justify-between gap-2">
+              {/* Header with image */}
+              <div className="flex items-start gap-3">
+                {/* Reward image thumbnail */}
+                <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg bg-muted">
+                  {reward.imageUrl ? (
+                    <Image
+                      src={reward.imageUrl}
+                      alt={reward.name}
+                      fill
+                      className="object-cover"
+                      sizes="56px"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                      <ImageIcon className="h-6 w-6" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Info */}
                 <div className="min-w-0 flex-1">
-                  <h3 className="truncate text-base font-semibold">{reward.name}</h3>
-                  {reward.description && (
-                    <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
-                      {reward.description}
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="truncate text-base font-semibold">{reward.name}</h3>
+                    <Badge variant={reward.isActive ? "default" : "secondary"}>
+                      {reward.isActive ? "Aktif" : "Nonaktif"}
+                    </Badge>
+                  </div>
+                  {/* Linked menu item name */}
+                  {reward.menuItem?.name && (
+                    <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                      Menu: {reward.menuItem.name}
                     </p>
                   )}
                 </div>
-                <Badge variant={reward.isActive ? "default" : "secondary"}>
-                  {reward.isActive ? "Aktif" : "Nonaktif"}
-                </Badge>
               </div>
 
-              {/* Details */}
-              <div className="mt-3 flex items-center gap-4 text-sm text-muted-foreground">
-                <span className="font-medium text-foreground">
+              {/* Badges and details */}
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                {/* Discount type badge */}
+                {reward.discountType === "free" ? (
+                  <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700">
+                    Gratis
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700">
+                    Diskon{" "}
+                    {reward.discountSubType === "percentage"
+                      ? `${reward.discountValue}%`
+                      : `Rp${(reward.discountValue ?? 0).toLocaleString("id-ID")}`}
+                  </span>
+                )}
+                <span className="text-sm font-medium text-foreground">
                   {reward.requiredPoints} poin
                 </span>
-                <span>Stok: {reward.stockQuantity}</span>
+                <span className="text-sm text-muted-foreground">
+                  Stok: {reward.stockQuantity}
+                </span>
+              </div>
+
+              {/* Redemption count */}
+              <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+                <TicketCheck className="h-3.5 w-3.5" />
+                <span>{reward.redemptionCount ?? 0} ditukar</span>
               </div>
 
               {/* Actions */}

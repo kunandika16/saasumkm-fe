@@ -1,90 +1,140 @@
 "use client";
 
-import { useState } from "react";
-import { Gift, Loader2 } from "lucide-react";
-import { AxiosError } from "axios";
+import Image from "next/image";
+import { Gift } from "lucide-react";
 
-import apiClient from "@/lib/api-client";
-import type { Reward, ApiError } from "@/types";
-import { Button } from "@/components/ui/button";
+import type { Reward } from "@/types";
+import { cn } from "@/lib/utils";
 
 interface RewardCardProps {
   reward: Reward;
-  onRedeemed?: () => void;
+  onRedeemClick?: (reward: Reward) => void;
 }
 
-export function RewardCard({ reward, onRedeemed }: RewardCardProps) {
-  const [isRedeeming, setIsRedeeming] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+export function RewardCard({ reward, onRedeemClick }: RewardCardProps) {
+  const isOutOfStock = reward.stockQuantity === 0;
+  const isMenuUnavailable = reward.menuItem?.isAvailable === false;
+  const isDisabled = isOutOfStock || isMenuUnavailable;
 
-  const handleRedeem = async () => {
-    setIsRedeeming(true);
-    setError(null);
-
-    try {
-      await apiClient.post(`/api/rewards/${reward.id}/redeem`);
-      setSuccess(true);
-      onRedeemed?.();
-    } catch (err) {
-      const axiosError = err as AxiosError<ApiError>;
-      const message =
-        axiosError.response?.data?.message || "Gagal menukar reward.";
-      setError(message);
-    } finally {
-      setIsRedeeming(false);
+  const handleClick = () => {
+    if (!isDisabled && onRedeemClick) {
+      onRedeemClick(reward);
     }
   };
 
   return (
-    <div className="rounded-xl border bg-card p-4 space-y-3">
-      {/* Reward info */}
-      <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-          <Gift className="h-5 w-5 text-primary" aria-hidden="true" />
+    <button
+      type="button"
+      onClick={handleClick}
+      disabled={isDisabled}
+      className={cn(
+        "relative flex w-full flex-col overflow-hidden rounded-xl border bg-card text-left transition-all",
+        isDisabled
+          ? "cursor-not-allowed opacity-70"
+          : "hover:shadow-md hover:border-primary/30 active:scale-[0.98]"
+      )}
+      aria-label={`Tukar ${reward.name} - ${reward.requiredPoints} poin`}
+    >
+      {/* Reward Image */}
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
+        {reward.imageUrl ? (
+          <Image
+            src={reward.imageUrl}
+            alt={reward.name}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 50vw, 200px"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+            <Gift className="h-10 w-10" aria-hidden="true" />
+          </div>
+        )}
+
+        {/* Out of Stock Overlay */}
+        {isOutOfStock && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+            <span className="rounded-md bg-destructive/90 px-3 py-1.5 text-xs font-bold uppercase text-white">
+              Habis
+            </span>
+          </div>
+        )}
+
+        {/* Unavailable Menu Item Overlay */}
+        {!isOutOfStock && isMenuUnavailable && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+            <span className="rounded-md bg-muted px-3 py-1.5 text-xs font-bold text-foreground">
+              Tidak tersedia
+            </span>
+          </div>
+        )}
+
+        {/* Discount Type Badge */}
+        <div className="absolute left-2 top-2">
+          <DiscountBadge
+            discountType={reward.discountType}
+            discountSubType={reward.discountSubType}
+            discountValue={reward.discountValue}
+          />
         </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-medium text-foreground leading-tight">
-            {reward.name}
-          </h3>
-          {reward.description && (
-            <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">
-              {reward.description}
-            </p>
+      </div>
+
+      {/* Card Content */}
+      <div className="flex flex-1 flex-col gap-1.5 p-3">
+        <h3 className="text-sm font-semibold leading-tight text-foreground line-clamp-2">
+          {reward.name}
+        </h3>
+
+        {/* Required Points */}
+        <div className="mt-auto flex items-center justify-between pt-1">
+          <span className="text-xs font-bold text-primary">
+            {(reward.requiredPoints ?? 0).toLocaleString("id-ID")} poin
+          </span>
+
+          {/* Stock Indicator */}
+          {!isOutOfStock && reward.stockQuantity <= 5 && (
+            <span className="text-[10px] font-medium text-muted-foreground">
+              Sisa {reward.stockQuantity}
+            </span>
           )}
         </div>
       </div>
+    </button>
+  );
+}
 
-      {/* Points required + Redeem button */}
-      <div className="flex items-center justify-between pt-2 border-t">
-        <span className="text-xs font-medium text-muted-foreground">
-          {(reward.requiredPoints ?? 0).toLocaleString("id-ID")} poin
-        </span>
+// ─── Discount Badge ──────────────────────────────────────────────────────────
 
-        {success ? (
-          <span className="text-xs font-medium text-primary">
-            Berhasil ditukar!
-          </span>
-        ) : (
-          <Button
-            size="sm"
-            className="min-h-[44px] min-w-[44px]"
-            disabled={isRedeeming}
-            onClick={handleRedeem}
-          >
-            {isRedeeming ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              "Tukar"
-            )}
-          </Button>
-        )}
-      </div>
+interface DiscountBadgeProps {
+  discountType: "free" | "discount";
+  discountSubType: "fixed" | "percentage" | null;
+  discountValue: number | null;
+}
 
-      {/* Error message */}
-      {error && (
-        <p className="text-xs text-destructive">{error}</p>
-      )}
-    </div>
+function DiscountBadge({
+  discountType,
+  discountSubType,
+  discountValue,
+}: DiscountBadgeProps) {
+  if (discountType === "free") {
+    return (
+      <span className="inline-flex items-center rounded-md bg-green-500/90 px-2 py-0.5 text-[10px] font-bold uppercase text-white shadow-sm">
+        Gratis
+      </span>
+    );
+  }
+
+  // Discount type
+  let label = "Diskon";
+  if (discountSubType === "percentage" && discountValue != null) {
+    label = `Diskon ${discountValue}%`;
+  } else if (discountSubType === "fixed" && discountValue != null) {
+    label = `Diskon ${discountValue.toLocaleString("id-ID")}`;
+  }
+
+  return (
+    <span className="inline-flex items-center rounded-md bg-blue-500/90 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
+      {label}
+    </span>
   );
 }

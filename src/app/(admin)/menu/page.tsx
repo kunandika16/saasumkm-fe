@@ -100,25 +100,55 @@ export default function AdminMenuPage() {
   }
 
   async function handleFormSubmit(formData: MenuItemFormData) {
-    if (editingItem) {
-      // Update existing item
-      await apiClient.patch(`/api/admin/menu/items/${editingItem.id}`, formData);
-    } else {
-      // Create new item
-      await apiClient.post("/api/admin/menu/items", formData);
+    // Build multipart FormData for the backend
+    const body = new FormData();
+    body.append("name", formData.name);
+    body.append("description", formData.description);
+    body.append("price", formData.price.toString());
+    body.append("categoryId", formData.categoryId);
+    body.append("isAvailable", formData.isAvailable.toString());
+
+    if (formData.imageFile) {
+      body.append("image", formData.imageFile);
+    } else if (formData.imageUrl === null && editingItem?.imageUrl) {
+      // Explicitly remove existing image
+      body.append("imageUrl", "null");
     }
-    setSheetOpen(false);
-    setEditingItem(null);
-    fetchCategories();
+
+    try {
+      let res;
+      if (editingItem) {
+        res = await apiClient.patch(`/api/admin/menu/items/${editingItem.id}`, body);
+      } else {
+        res = await apiClient.post("/api/admin/menu/items", body);
+      }
+
+      // The auto-unwrap interceptor replaces response.data with the inner 'data' field.
+      // Warning lives at the top level of the original response, so check raw response.
+      const rawData = res?.data;
+      const warning = rawData?.warning;
+      if (warning) {
+        alert(warning);
+      }
+
+      setSheetOpen(false);
+      setEditingItem(null);
+      fetchCategories();
+    } catch (err: unknown) {
+      // Extract error message from backend response
+      const axiosErr = err as { response?: { data?: { error?: { message?: string } } } };
+      const msg = axiosErr?.response?.data?.error?.message || "Gagal menyimpan menu. Silakan coba lagi.";
+      alert(msg);
+    }
   }
 
   // ─── Toggle Availability ────────────────────────────────────────────────
 
   async function handleToggleAvailability(item: MenuItem) {
     try {
-      await apiClient.patch(`/api/admin/menu/items/${item.id}`, {
-        isAvailable: !item.isAvailable,
-      });
+      const body = new FormData();
+      body.append("isAvailable", (!item.isAvailable).toString());
+      await apiClient.patch(`/api/admin/menu/items/${item.id}`, body);
       fetchCategories();
     } catch {
       // silently fail — user can retry

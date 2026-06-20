@@ -58,7 +58,7 @@ function formatDiscount(type: DiscountType, value: number): string {
 // ─── Landing Page Component ──────────────────────────────────────────────────
 
 export default function LandingPage() {
-  const [tenant, setTenant] = useState<Tenant | null>(null);
+  const [tenant, setTenant] = useState<(Tenant & { landingPageUrl?: string | null }) | null>(null);
   const [promotions, setPromotions] = useState<Voucher[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -69,18 +69,28 @@ export default function LandingPage() {
       setError(null);
 
       try {
-        const [tenantRes, vouchersRes] = await Promise.all([
-          apiClient.get<Tenant>("/api/tenant"),
-          apiClient.get<Voucher[]>("/api/vouchers/active"),
-        ]);
-
+        // Fetch tenant info first
+        const tenantRes = await apiClient.get<Tenant & { landingPageUrl?: string | null }>("/api/tenant");
         setTenant(tenantRes.data);
-        const vouchersData = vouchersRes.data;
-        setPromotions(
-          Array.isArray(vouchersData)
-            ? vouchersData.slice(0, 10)
-            : []
-        );
+
+        // If tenant has custom landing page URL, skip fetching vouchers
+        if (tenantRes.data?.landingPageUrl) {
+          return;
+        }
+
+        // Only fetch vouchers for default landing page
+        try {
+          const vouchersRes = await apiClient.get<Voucher[]>("/api/vouchers/active");
+          const vouchersData = vouchersRes.data;
+          setPromotions(
+            Array.isArray(vouchersData)
+              ? vouchersData.slice(0, 10)
+              : []
+          );
+        } catch {
+          // Vouchers fetch failure is non-critical — show landing without promos
+          setPromotions([]);
+        }
       } catch {
         setError("Gagal memuat informasi bisnis. Silakan coba lagi.");
       } finally {
@@ -133,8 +143,26 @@ export default function LandingPage() {
     );
   }
 
-  // ─── Social Links (max 5) ────────────────────────────────────────────────
+  // ─── Iframe Landing Page (custom URL per tenant) ─────────────────────────
 
+  if (tenant.landingPageUrl) {
+    return (
+      <div className="h-[calc(100vh-80px)] w-full">
+        <iframe
+          src={tenant.landingPageUrl}
+          className="h-full w-full border-0"
+          sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+          allow="autoplay; encrypted-media"
+          title={`${tenant.businessName} landing page`}
+          loading="eager"
+        />
+      </div>
+    );
+  }
+
+  // ─── Default Landing Page ────────────────────────────────────────────────
+
+  // Social Links (max 5)
   const socialEntries = tenant.socialLinks
     ? Object.entries(tenant.socialLinks).slice(0, 5)
     : [];

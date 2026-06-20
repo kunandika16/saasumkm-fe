@@ -7,6 +7,11 @@ export enum OrderStatus {
   EXPIRED = "expired",
 }
 
+export enum PaymentMethod {
+  CASH = "cash",
+  QRIS = "qris",
+}
+
 export enum DiscountType {
   PERCENTAGE = "percentage",
   FIXED = "fixed",
@@ -104,6 +109,7 @@ export interface Order {
   discountAmount: number;
   finalTotal: number;
   status: OrderStatus;
+  paymentMethod: PaymentMethod;
   paymentBarcode: string | null;
   pointsEarned: number;
   createdAt: string;
@@ -154,7 +160,33 @@ export interface Reward {
   requiredPoints: number;
   stockQuantity: number;
   isActive: boolean;
+  imageUrl: string | null;
+  menuItemId: string | null;
+  discountType: 'free' | 'discount';
+  discountSubType: 'fixed' | 'percentage' | null;
+  discountValue: number | null;
   createdAt: string;
+  menuItem?: MenuItem;
+  redemptionCount?: number;
+}
+
+export interface RewardVoucher {
+  id: string;
+  tenantId: string;
+  memberId: string;
+  rewardId: string;
+  menuItemId: string;
+  code: string;
+  discountType: 'free' | 'discount';
+  discountSubType: 'fixed' | 'percentage' | null;
+  discountValue: number | null;
+  expiryDate: string;
+  isUsed: boolean;
+  usedAt: string | null;
+  orderId: string | null;
+  createdAt: string;
+  reward?: Reward;
+  menuItem?: MenuItem;
 }
 
 export interface PointTransaction {
@@ -209,6 +241,8 @@ export interface RefreshTokenRequest {
 export interface CheckoutRequest {
   items: CartItemRequest[];
   voucherCode?: string;
+  rewardVoucherCode?: string;
+  paymentMethod: "cash" | "qris";
 }
 
 export interface CartItemRequest {

@@ -81,7 +81,7 @@ export default function OrderTable({
               <TableHead>Items</TableHead>
               <TableHead>Total</TableHead>
               <TableHead>Voucher</TableHead>
-              <TableHead>Barcode</TableHead>
+              <TableHead>Metode</TableHead>
               <TableHead>Waktu</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Aksi</TableHead>
@@ -111,9 +111,9 @@ export default function OrderTable({
                   )}
                 </TableCell>
                 <TableCell>
-                  <span className="font-mono text-xs">
-                    {order.paymentBarcode ?? "-"}
-                  </span>
+                  <Badge variant="outline" className="text-xs capitalize">
+                    {order.paymentMethod ?? "-"}
+                  </Badge>
                 </TableCell>
                 <TableCell className="text-xs text-muted-foreground">
                   {format(new Date(order.createdAt), "dd MMM yyyy HH:mm", {
@@ -209,14 +209,12 @@ export default function OrderTable({
                   <Badge variant="secondary">{order.voucher.code}</Badge>
                 </div>
               )}
-              {order.paymentBarcode && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Barcode</span>
-                  <span className="font-mono text-xs">
-                    {order.paymentBarcode}
-                  </span>
-                </div>
-              )}
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Metode</span>
+                <Badge variant="outline" className="capitalize">
+                  {order.paymentMethod ?? "-"}
+                </Badge>
+              </div>
             </div>
 
             <div className="flex items-center gap-2 pt-1">

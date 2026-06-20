@@ -3,7 +3,6 @@
 import { useCallback, useRef, useState } from "react";
 import { Loader2, Upload, X, ImagePlus } from "lucide-react";
 
-import apiClient from "@/lib/api-client";
 import { API_BASE_URL } from "@/lib/constants";
 import type { MenuCategory, MenuItem } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -24,6 +23,7 @@ export interface MenuItemFormData {
   price: number;
   categoryId: string;
   imageUrl: string | null;
+  imageFile: File | null;
   isAvailable: boolean;
 }
 
@@ -51,12 +51,12 @@ export default function MenuItemForm({
   const [imageUrl, setImageUrl] = useState<string | null>(
     initialData?.imageUrl ?? null
   );
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [isAvailable, setIsAvailable] = useState(
     initialData?.isAvailable ?? true
   );
 
   const [submitting, setSubmitting] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -92,7 +92,7 @@ export default function MenuItemForm({
   // ─── Image Upload ──────────────────────────────────────────────────────────
 
   const handleImageUpload = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
 
@@ -115,36 +115,22 @@ export default function MenuItemForm({
         return;
       }
 
-      setUploading(true);
       setErrors((prev) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { image: _, ...rest } = prev;
         return rest;
       });
 
-      try {
-        const formData = new FormData();
-        formData.append("image", file);
-
-        const { data } = await apiClient.post("/api/upload/image", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-
-        setImageUrl(data.url);
-      } catch {
-        setErrors((prev) => ({
-          ...prev,
-          image: "Gagal mengupload gambar. Coba lagi.",
-        }));
-      } finally {
-        setUploading(false);
-      }
+      // Store file locally and create preview URL
+      setImageFile(file);
+      setImageUrl(URL.createObjectURL(file));
     },
     []
   );
 
   function removeImage() {
     setImageUrl(null);
+    setImageFile(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -165,6 +151,7 @@ export default function MenuItemForm({
         price: parseInt(price, 10),
         categoryId,
         imageUrl,
+        imageFile,
         isAvailable,
       });
     } finally {
@@ -175,7 +162,7 @@ export default function MenuItemForm({
   // ─── Render ────────────────────────────────────────────────────────────────
 
   const imagePreviewUrl = imageUrl
-    ? imageUrl.startsWith("http")
+    ? imageUrl.startsWith("http") || imageUrl.startsWith("blob:")
       ? imageUrl
       : `${API_BASE_URL}${imageUrl}`
     : null;
@@ -308,22 +295,16 @@ export default function MenuItemForm({
             }}
             aria-label="Upload gambar"
           >
-            {uploading ? (
-              <Loader2 className="h-8 w-8 animate-spin text-sky-500" />
-            ) : (
-              <>
-                <span className="grid h-12 w-12 place-items-center rounded-full bg-white text-sky-500 shadow-sm">
-                  <ImagePlus className="h-5 w-5" />
-                </span>
-                <p className="mt-3 text-sm font-bold text-slate-700">
-                  Upload gambar menu
-                </p>
-                <p className="mt-1 text-xs font-medium text-slate-400">
-                  JPG, PNG, WebP (maks 2MB)
-                </p>
-                <Upload className="mt-3 h-4 w-4 text-slate-400" />
-              </>
-            )}
+            <span className="grid h-12 w-12 place-items-center rounded-full bg-white text-sky-500 shadow-sm">
+              <ImagePlus className="h-5 w-5" />
+            </span>
+            <p className="mt-3 text-sm font-bold text-slate-700">
+              Upload gambar menu
+            </p>
+            <p className="mt-1 text-xs font-medium text-slate-400">
+              JPG, PNG, WebP (maks 2MB)
+            </p>
+            <Upload className="mt-3 h-4 w-4 text-slate-400" />
           </div>
         )}
         <input
@@ -374,7 +355,7 @@ export default function MenuItemForm({
         >
           Batal
         </Button>
-        <Button type="submit" disabled={submitting || uploading} className="h-11 px-5">
+        <Button type="submit" disabled={submitting} className="h-11 px-5">
           {submitting && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
           {initialData ? "Simpan Perubahan" : "Tambah Menu"}
         </Button>
